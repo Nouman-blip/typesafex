@@ -1,0 +1,7 @@
+[project]
+name = "typesafex"
+version = "0.1.0"
+description = "Prevent your Python code from lying — before it ships."
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = []
