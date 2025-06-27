@@ -8,12 +8,12 @@ app=typer.Typer(help="TypeSafeX CLI tool. Use 'typesafex --help' subcommands.")
 # load the config 
 config = load_config()
 
-from decorators.ensure_types import ensure_types 
+from decorators.ensure_types import ensure_types,mode_context
 
 @ensure_types
 def greet(name: str) -> str:
-    
-    return f"Hello, {name}!"
+    a=5
+    return a
 
 
 @app.command()
@@ -33,12 +33,11 @@ def check(
     
     """
     effective_mode = mode_override or config['mode']
-    typer.echo(f" Running TypeSafeX check in {effective_mode.upper()} mode")
-
-    result = greet('world')
-    
-    typer.echo(f"Decorated function return results {result}")
-
+    token = mode_context.set(effective_mode)
+    try:
+        result = greet(7)
+    finally:
+        mode_context.reset(token)
     
 
 @app.command()
