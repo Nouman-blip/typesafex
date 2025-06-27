@@ -1,0 +1,8 @@
+# primary purposes Human readable 
+
+# 1. Defines the default mode of enforcement(strict,warn,off)
+# 2. Enables/control plugins
+# 3. sets logging,debuging, test-gen options
+# 4. Allows per-project consistency for teams or CI
+
+mode: strict # defualt strict|warn|off
