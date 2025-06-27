@@ -1,7 +1,20 @@
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "typesafex"
 version = "0.1.0"
 description = "Prevent your Python code from lying — before it ships."
 readme = "README.md"
-requires-python = ">=3.13"
-dependencies = []
+requires-python = ">=3.10"
+dependencies = [
+    "typer",
+]
+
+[project.scripts]
+typesafex="cli.main:app"
+
+[tool.setuptools.packages.find]
+where=['.']
+include = ["cli", "core", "config", "plugins", "runtime", "contracts", "decorators"]
