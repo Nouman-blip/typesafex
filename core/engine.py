@@ -11,7 +11,7 @@ class Engine:
     def __init__(self, mode:str) -> None:
         self._mode = mode
         
-    def handle_violations(self, metadata: dict, args_violations: list, return_violations: str) -> None:
+    def handle_type_violations(self, metadata: dict, args_violations: list, return_violations: str) -> None:
         """
         tracing the logs and showing the violation on the basis of mode.
         mode-> strict: then raised voilation -> warn: then raised warnings -> off: do nothing
@@ -49,4 +49,25 @@ class Engine:
             case _:
                 logger.info(f"please choose from 'strict', 'warn', 'off")
 
-
+    def handle_post_violation(self, function_name: str, violations: list) -> None:
+        """
+        handle post condtion violation of func
+        Args:
+          function_name: str of function name to check condition violation
+          violations: list of condition's violation
+        
+        return:
+            None: logs the violation
+        """
+        for violation in violations:
+            if not violation:
+                return
+            match self._mode:
+                case 'strict':
+                    logger.error(str(violation))
+                case 'warn':
+                    logger.warning(f"[Warn] might be violation.")
+                case 'off':
+                    pass
+                case _:
+                    logger.info("Please choose from these strict,warn,off")

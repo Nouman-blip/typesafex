@@ -30,7 +30,7 @@ def ensure_types(func):
             "return_value":result
         }
         # called and passed the args
-        engine.handle_violations(metadata,args_violations,return_violations)
+        engine.handle_type_violations(metadata,args_violations,return_violations)
         return result
     return wrapper
 
