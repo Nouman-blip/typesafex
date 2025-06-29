@@ -9,10 +9,11 @@ app=typer.Typer(help="TypeSafeX CLI tool. Use 'typesafex --help' subcommands.")
 config = load_config()
 
 from decorators.ensure_types import ensure_types, mode_context
-from decorators.ensures import ensures,mode_context
+from decorators.ensures import ensures, mode_context
+from decorators.requires import requires,mode_context
 
-@ensures(('name must be str',lambda name: isinstance(name,str) ),("first letter be Capital",lambda name: len(name)>0 and name[0].isupper()))
-def greet(name: str) -> str:
+@requires(('name must be str',lambda name: isinstance(name,str) ),("must be integer",lambda a: isinstance(a,int) ))
+def greet(name: str,a:int) -> str:
     return f"{name},bhai"
 
 
@@ -35,7 +36,7 @@ def check(
     effective_mode = mode_override or config['mode']
     token = mode_context.set(effective_mode)
     try:
-        result = greet('nouman')
+        result = greet('nouman',9)
     finally:
         mode_context.reset(token)
     

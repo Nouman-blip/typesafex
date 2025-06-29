@@ -49,7 +49,7 @@ class Engine:
             case _:
                 logger.info(f"please choose from 'strict', 'warn', 'off")
 
-    def handle_post_violation(self, function_name: str, violations: list) -> None:
+    def handle_violation(self, function_name: str, violations: list) -> None:
         """
         handle post condtion violation of func
         Args:
@@ -66,7 +66,7 @@ class Engine:
                 case 'strict':
                     logger.error(str(violation))
                 case 'warn':
-                    logger.warning(f"[Warn] might be violation.")
+                    logger.warning(f"[Warn] Continuing despite violation.")
                 case 'off':
                     pass
                 case _:

@@ -36,7 +36,7 @@ def ensures(*conditions):
                         reason=f"Error in post-condition: {e}",
                         location="return"
                     ))
-            engine.handle_post_violation(func.__name__, violations)
+            engine.handle_violation(func.__name__, violations)
             return result
         return wrapper
     return ensures_decorator
