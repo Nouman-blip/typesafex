@@ -13,6 +13,6 @@ class Violation:
         self.reason = reason
         self.location = location
         
-    def __str__(self):
-        return f"[Violation] in {self.func} at {self.location}:{self.reason}"
+    def __str__(self)->str:
+        return f"[Violation] in func_name:{self.func} at location:{self.location}:{self.reason}"
                

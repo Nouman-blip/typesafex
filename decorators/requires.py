@@ -27,7 +27,7 @@ def requires(*conditions):
             keep_only_non_empty_list_value = {arg_name: result_list for arg_name, result_list in failed_conditions.items() if result_list}
             only_labels_list_value = {arg_name: [condition_label for condition_label, bool_val in violate_list] for arg_name, violate_list in keep_only_non_empty_list_value.items()}
             
-            violations_results = {arg_name: [f"Pre-condition failed: {arg_name}={arguments_[arg_name]}->{label}" for label in condition_list] for arg_name, condition_list in only_labels_list_value.items()}
+            violations_results = {arg_name: [f"Pre-condition failed: arg_name:{arg_name}=arg_val:{arguments_[arg_name]}->reason:{label}" for label in condition_list] for arg_name, condition_list in only_labels_list_value.items()}
             results_list=[]
             for key, result_value in violations_results.items():
                 results_list += result_value

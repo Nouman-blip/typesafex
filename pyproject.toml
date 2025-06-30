@@ -17,4 +17,4 @@ typesafex="cli.main:app"
 
 [tool.setuptools.packages.find]
 where=['.']
-include = ["cli", "core", "config", "plugins", "runtime", "contracts", "decorators"]
+include = ["cli", "core", "config", "plugins", "runtime", "contracts", "decorators","reporting"]
