@@ -12,7 +12,7 @@ from decorators.ensure_types import ensure_types, mode_context
 from decorators.ensures import ensures, mode_context
 from decorators.requires import requires,mode_context
 
-@requires(('name must be str',lambda name: isinstance(name,str) ),("must be integer",lambda a: isinstance(a,int) ))
+@requires({'name':[('name must be str',lambda name: isinstance(name,str) )],'a':[("must be integer",lambda a: isinstance(a,int) )]})
 def greet(name: str,a:int) -> str:
     return f"{name},bhai"
 
