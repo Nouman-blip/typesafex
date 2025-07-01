@@ -4,8 +4,15 @@ import os
 
 # if .typesafex.yaml fails the system stil works
 DEFAULT_CONFIG = {
-    "mode": "strict", # default
-    #..... 
+    "mode": "strict",  # default
+    "plugins": {
+        "enabled": "true",
+        "paths": [
+            'plugins/slack_notifier.py',
+            'plugins/violation_counter.py',
+            'plugins/test_collector.py'
+        ]
+    }
 }
 
 CONFIG_PATHS= [

@@ -1,4 +1,6 @@
+from config.loader import load_config
 from reporting.test_generator import TestGenerator
+from core.plugin_manager import PluginManager
 from typing import List,Any
 import logging
 import re
@@ -6,13 +8,15 @@ import re
 logger = logging.getLogger('typesafex')
 logging.basicConfig(encoding='utf-8',
                      level=logging.DEBUG)
-
+# load config from config.loader
+CONFIG=load_config()
 class Engine:
     """
     log the function it decides what should print and why
     """
     def __init__(self, mode:str) -> None:
         self._mode = mode
+        self.plugin_manager=PluginManager(CONFIG)
         
     def handle_type_violations(self, metadata: dict, args_violations: list, return_violations: str) -> None:
         """
@@ -65,17 +69,24 @@ class Engine:
         for violation in violations:
             if not violation:
                 return
+            # violate list after extracted values from a violation str
             violation_list = self.extract_values(str(violation))
-            match self._mode:
-                case 'strict':
-                    logger.error(str(violation))
-                    x = TestGenerator(
+            # generated test stub
+            test_stub_generated = TestGenerator(
                         func_name=violation_list[0],
                         arg_val=violation_list[1],
                         location=violation_list[2],
                         reason=violation_list[3]
                        )
-                    logger.info(str(x))
+            match self._mode:
+                case 'strict':
+                    # logging violation
+                    logger.error(str(violation))
+                    #  pass to the plugin manager to handle violation
+                    self.plugin_manager.dispatch('on_violation', violation)
+                    #logging test suggestion
+                    self.plugin_manager.dispatch("on_test_generated",str(test_stub_generated))
+                    # logger.info(str(test_stub_generated))
                 case 'warn':
                     logger.warning(f"[Warn] Continuing despite violation.")
                 case 'off':
@@ -104,7 +115,7 @@ class Engine:
             violate_list.append(func_name)
             arg_name = match.group('arg_name')
             arg_val = match.group('arg_val').strip()
-            final_arg_val = __class__.str_other_type(arg_val)
+            final_arg_val = __class__.repr_str(arg_val)
             violate_list.append(final_arg_val)
             location = match.group('location')
             violate_list.append(location)
@@ -114,7 +125,7 @@ class Engine:
         return violate_list
 
     @staticmethod
-    def str_other_type(arg_val: Any) -> Any:
+    def repr_str(arg_val: Any) -> Any:
         """
         To check if value is str or other type to repr it. if it is string then repr other wise not
         Args:
