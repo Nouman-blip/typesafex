@@ -12,8 +12,8 @@ from decorators.ensure_types import ensure_types, mode_context
 from decorators.ensures import ensures, mode_context
 from decorators.requires import requires,mode_context
 
-@requires({'name':[('name must be str',lambda name: isinstance(name,str) )],'a':[("must be integer",lambda a: isinstance(a,int) )]})
-def greet(name: str,a:int) -> str:
+@requires({'name':[('len(name)>8',lambda name: len(name)>8 ),("name=='Nouman'",lambda name: name=='Nouman' )],'a':[("isinstance(a,str)",lambda a: isinstance(a,str) )]})
+def greet(name: str,a:str) -> str:
     return f"{name},bhai"
 
 
