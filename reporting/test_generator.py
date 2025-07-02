@@ -14,6 +14,6 @@ class TestGenerator:
         self.reason=reason
     
     def __str__(self) -> str:
-        test_stub = f"\n[Test Suggestion]\ndef test_{self.func_name}_{self.location}():\n   result={self.func_name}({self.arg_val})\n   assert {self.reason}"
+        test_stub = f"\n#[Test Suggestion]\ndef test_{self.func_name}_{self.location}():\n   result={self.func_name}({self.arg_val})\n   assert {self.reason}\n"
         return test_stub
         

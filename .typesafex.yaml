@@ -6,3 +6,16 @@
 # 4. Allows per-project consistency for teams or CI
 
 mode: strict # defualt strict|warn|off
+
+plugins:
+  # list of plugins to enable
+  enabled: true
+  paths:
+    - plugins/slack_notifier.py
+    - plugins/test_collector.py
+    - plugins/violation_counter.py
+
+test_generation:
+   export_stub: true
+   export_stub_path: tests/generated
+   include_docstring: true
