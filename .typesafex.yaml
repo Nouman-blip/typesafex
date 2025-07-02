@@ -14,3 +14,8 @@ plugins:
     - plugins/slack_notifier.py
     - plugins/test_collector.py
     - plugins/violation_counter.py
+
+test_generation:
+   export_stub: true
+   export_stub_path: tests/generated
+   include_docstring: true

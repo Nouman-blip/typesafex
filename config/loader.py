@@ -12,6 +12,11 @@ DEFAULT_CONFIG = {
             'plugins/violation_counter.py',
             'plugins/test_collector.py'
         ]
+    },
+    "test_generation": {
+        "export_stub": "true",
+        "export_stub_path": "tests/generated",
+        "include_docstring": "true"
     }
 }
 

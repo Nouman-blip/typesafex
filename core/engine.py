@@ -85,7 +85,7 @@ class Engine:
                     #  pass to the plugin manager to handle violation
                     self.plugin_manager.dispatch('on_violation', violation)
                     #logging test suggestion
-                    self.plugin_manager.dispatch("on_test_generated",str(test_stub_generated))
+                    self.plugin_manager.dispatch("on_test_generated",violation_list[0],violation_list[2],str(test_stub_generated))
                     # logger.info(str(test_stub_generated))
                 case 'warn':
                     logger.warning(f"[Warn] Continuing despite violation.")
