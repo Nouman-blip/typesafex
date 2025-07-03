@@ -1,4 +1,5 @@
 from config.loader import load_config
+from core.plugin_manager import PluginManager
 from typing import Optional
 import typer
 
@@ -6,25 +7,33 @@ import typer
 app=typer.Typer(help="TypeSafeX CLI tool. Use 'typesafex --help' subcommands.")
  
 # load the config 
-config = load_config()
+CONFIG= load_config()
 
 from decorators.ensure_types import ensure_types, mode_context
 from decorators.ensures import ensures, mode_context
-from decorators.requires import requires,mode_context
+from decorators.requires import requires, mode_context
+from plugins.test_collector import export_test_stub_context
 
 @requires({'name':[('len(name)>8',lambda name: len(name)>8 ),("name=='Nouman'",lambda name: name=='Nouman' )],'a':[("isinstance(a,str)",lambda a: isinstance(a,str) )]})
 def greet(name: str,a:str) -> str:
     return f"{name},bhai"
 
 
-@app.command()
+@app.command(help="Check contracts in your code.")
 def check(
          mode_override: Optional[str] = typer.Option(
             None,  #defualt value
             "--mode",  # long form of the option
             "-m",  #optional short term
-            help=f"Override enforecement mode for this check.  "
-         ) )->None:
+            help=f"Override enforecement mode for this check.  ",
+         ),
+         export_test: Optional[bool] = typer.Option(
+                False,  # default value
+                "--export-test",  # long form of the option
+                "-e",  # optional short term
+                help="Export test stubs to a file.",
+            )
+        )->None:
     """
     Scans,activate, and optionally enforce runtime contracts on decoratored 
      Python code
@@ -33,22 +42,42 @@ def check(
        or typesafex check file --mode warn
     
     """
-    effective_mode = mode_override or config['mode']
-    token = mode_context.set(effective_mode)
+    effective_mode = mode_override if mode_override is not None else CONFIG['mode']
+    mode_token = mode_context.set(effective_mode)
+    # Set the export_test context variable based on the command line option
+    if export_test:
+        effective_export_test = export_test
+    else:
+        effective_export_test = CONFIG['test_generation']['export_test_stub'] 
+    print(f"Export test stubs: {effective_export_test}")
+    export_test_token = export_test_stub_context.set(effective_export_test)
     try:
-        result = greet('nouman',9)
+        result = greet('nouman', 9)
     finally:
-        mode_context.reset(token)
-    
+        mode_context.reset(mode_token)
+        export_test_stub_context.reset(export_test_token)
 
-@app.command()
-def mode(mode_type: str):
-    """
-    Enforcement mode strict,warn,off.
-    """
-    typer.echo(f"The user in {mode_type} mode.")
 
-@app.command()
+@app.command(help="List all loaded plugins.")
+def plugins():
+    try:
+        # Initialize the PluginManager with the loaded config
+        plugin_manager = PluginManager(CONFIG)
+        for plugin in plugin_manager.plugins:
+            typer.echo(f"{plugin.__class__.__name__}")
+    except Exception as e:
+        typer.echo(f"Error listing plugins: {e}", err=True)
+
+@app.command(help="List all configuration settings.")
+def config():
+    """
+    List all configuration settings.
+    """
+    typer.echo("Current configuration settings:")
+    for key, value in CONFIG.items():
+        typer.echo(f"{key}: {value}")
+
+@app.command(help="Run the TypeSafeX CLI version command.")
 def version():
     """
     Get the TypeSafeX CLI version.

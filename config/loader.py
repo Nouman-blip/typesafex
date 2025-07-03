@@ -14,7 +14,7 @@ DEFAULT_CONFIG = {
         ]
     },
     "test_generation": {
-        "export_stub": "true",
+        "export_test_stub": "false",
         "export_stub_path": "tests/generated",
         "include_docstring": "true"
     }
