@@ -16,7 +16,16 @@ class Engine:
     """
     def __init__(self, mode:str) -> None:
         self._mode = mode
-        self.plugin_manager=PluginManager(CONFIG)
+        self._plugin_manager = None 
+    
+    @property
+    def plugin_manager(self):
+        """
+        Lazy initialization of plugin manager
+        """
+        if self._plugin_manager is None:
+            self._plugin_manager = PluginManager(CONFIG)
+        return self._plugin_manager
         
     def handle_type_violations(self, metadata: dict, args_violations: list, return_violations: str) -> None:
         """
@@ -85,7 +94,8 @@ class Engine:
                     #  pass to the plugin manager to handle violation
                     self.plugin_manager.dispatch('on_violation', violation)
                     #logging test suggestion
-                    self.plugin_manager.dispatch("on_test_generated",violation_list[0],violation_list[2],str(test_stub_generated))
+                    from plugins.test_collector import export_test_stub_context
+                    self.plugin_manager.dispatch("on_test_generated",violation_list[0],violation_list[2],export_test_stub_context.get(),str(test_stub_generated))
                     # logger.info(str(test_stub_generated))
                 case 'warn':
                     logger.warning(f"[Warn] Continuing despite violation.")

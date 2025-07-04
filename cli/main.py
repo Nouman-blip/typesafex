@@ -1,5 +1,6 @@
 from config.loader import load_config
 from core.plugin_manager import PluginManager
+from plugins.test_collector import export_test_stub_context
 from typing import Optional
 import typer
 
@@ -12,7 +13,6 @@ CONFIG= load_config()
 from decorators.ensure_types import ensure_types, mode_context
 from decorators.ensures import ensures, mode_context
 from decorators.requires import requires, mode_context
-from plugins.test_collector import export_test_stub_context
 
 @requires({'name':[('len(name)>8',lambda name: len(name)>8 ),("name=='Nouman'",lambda name: name=='Nouman' )],'a':[("isinstance(a,str)",lambda a: isinstance(a,str) )]})
 def greet(name: str,a:str) -> str:
@@ -45,11 +45,7 @@ def check(
     effective_mode = mode_override if mode_override is not None else CONFIG['mode']
     mode_token = mode_context.set(effective_mode)
     # Set the export_test context variable based on the command line option
-    if export_test:
-        effective_export_test = export_test
-    else:
-        effective_export_test = CONFIG['test_generation']['export_test_stub'] 
-    print(f"Export test stubs: {effective_export_test}")
+    effective_export_test= export_test if export_test else CONFIG['test_generation']['export_test_stub'] 
     export_test_token = export_test_stub_context.set(effective_export_test)
     try:
         result = greet('nouman', 9)
