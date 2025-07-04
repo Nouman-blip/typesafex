@@ -6,6 +6,7 @@ import contextvars
 CONFIG = load_config()
 # Define a context variable for exporting test stubs
 export_test_stub_context = contextvars.ContextVar("export_test_stub", default=False)
+
 class TestCollector(PluginBase):
     """
     collect test stub generated to a file
@@ -13,9 +14,9 @@ class TestCollector(PluginBase):
     def __init__(self):
         super().__init__()
         # load the config of test_generated from .typesafex.yaml
-        self.test_stub_config = CONFIG["test_generation"]["export_stub_path"] 
+        self.test_stub_config = CONFIG["test_generation"]["export_stub_path"]
 
-    def on_test_generated(self,func_name:str, location:str , test_stub: str)-> None:
+    def on_test_generated(self,func_name:str, location:str ,export_test:bool ,test_stub: str)-> None:
         """
         generated test stub collect into a .py file 
         Args:
@@ -25,8 +26,7 @@ class TestCollector(PluginBase):
         # check if export_test_stub_context is set to False then just print
         if not test_stub:
             raise ValueError("Test stub is empty. Nothing to export.")
-        print("export_test_stub_context", export_test_stub_context.get())
-        if not export_test_stub_context.get():
+        if not export_test:
             print(f"printing test {test_stub}")
             return
        # if true then write to a file and export it
