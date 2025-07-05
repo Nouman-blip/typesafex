@@ -148,7 +148,7 @@ class TypeChecker:
             return ""
         
         # check if the result is an instance of the annotated return type
-        if not isinstance(result, original_func_return_type):
+        if not TyperChecker._valid_type(result, original_func_return_type):
             return f"{func.__name__}: expected return type {original_func_return_type}, got {type(result)}"
         
         return ""
