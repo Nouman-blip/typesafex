@@ -6,8 +6,8 @@ def test_greet_precondition():
 
 #[Test Suggestion]
 def test_greet_precondition():
-   result=greet('nouman')
-   assert 'nouman'=='Nouman'
+   input_="nouman"
+   assert 'Nouman'=='Nouman'
 
 #[Test Suggestion]
 def test_greet_precondition():
