@@ -27,15 +27,20 @@ def requires(*conditions):
             keep_only_non_empty_list_value = {arg_name: result_list for arg_name, result_list in failed_conditions.items() if result_list}
             only_labels_list_value = {arg_name: [condition_label for condition_label, bool_val in violate_list] for arg_name, violate_list in keep_only_non_empty_list_value.items()}
             
-            violations_results = {arg_name: [f"Pre-condition failed: arg_name:{arg_name}=arg_val:{arguments_[arg_name]}->reason:{label}" for label in condition_list] for arg_name, condition_list in only_labels_list_value.items()}
-            results_list=[]
-            for key, result_value in violations_results.items():
-                results_list += result_value
+            violations_results = {arg_name: [(arg_name,arguments_[arg_name], label) for label in condition_list] for arg_name, condition_list in only_labels_list_value.items()}
+            #flatten into single list of tuples final -results 
+            results_list=[violate_result for sublist in violations_results.values() for violate_result in sublist]
+        
             if results_list:
-                for violate_result in results_list:
-                    violations.append(Violation(
+                for result in results_list:
+                    violations.update(Violation(
                         func=func.__name__,
-                        reason=violate_result,
+                        arg_name=result[0]
+                        arg_val=result[1],
+                        condition=result[2]
+                        reason=f"Pre-condition failed: {result[2]}",
+                        args=bound.args,
+                        kwargs=bound.kwargs,
                         location='precondition'
                     ))
             engine.handle_violation(func.__name__, violations)
