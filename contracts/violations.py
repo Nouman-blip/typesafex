@@ -1,4 +1,3 @@
-from reporting.test_generator import TestGenerator
 from typing import Any
 
 class Violation:
@@ -6,7 +5,7 @@ class Violation:
     --handle contract enforcement violations
     """
 
-    def __init__(self,func:str,arg_name:str,arg_val:Any,condition:str,reason:str,location:str)->None:
+    def __init__(self,func:str,arg_name:str,arg_val:Any,condition:str,reason:str,location:str,args:Any,kwargs:Any)->None:
         """
         capture violation 
         """
@@ -16,12 +15,12 @@ class Violation:
         self.condition=condition
         self.reason = reason
         self.location = location
-        self.test_stub = TestGenerator(self.func, self.arg_name, self.arg_val, self.location, self.condition)
+        self.args = args
+        self.kwargs = kwargs
         
-    
         
     def __str__(self)->str:
-        return {f"[Violation] in {self.func} at {self.location}, {self.reason}":self.test_stub}
+        return f"[Violation] in {self.func} at  {self.location}, {self.condition} and with arg's name and value {self.arg_name}, {self.arg_val}  with args {self.args} and kwargs {self.kwargs} {self.reason}"
         
     
     

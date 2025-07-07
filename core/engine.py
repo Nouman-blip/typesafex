@@ -1,23 +1,36 @@
 from config.loader import load_config
 from reporting.test_generator import TestGenerator
+from reporting.json_format_violations import ViolationJson
 from core.plugin_manager import PluginManager
-from typing import List,Any
+from typing import List,Dict, Any
+import contextvars
 import logging
+import time
 import re
 
 logger = logging.getLogger('typesafex')
 logging.basicConfig(encoding='utf-8',
                      level=logging.DEBUG)
+
 # load config from config.loader
-CONFIG=load_config()
+
+CONFIG = load_config()
+report_context = contextvars.ContextVar("report", default=False)
+mode_context = contextvars.ContextVar("mode", default=None)
+export_test_stub_context = contextvars.ContextVar("export_test_stub", default=False)
+
 class Engine:
     """
     log the function it decides what should print and why
     """
-    def __init__(self, mode:str) -> None:
-        self._mode = mode
-        self._plugin_manager = None 
-    
+    def __init__(self) -> None:
+        self._mode: bool = mode_context.get()
+        self._plugin_manager = None
+        self._report: bool = report_context.get() 
+        self._violations: List[Dict[str, Any]] = []
+        self._export_test_stub: bool = export_test_stub_context.get()
+
+
     @property
     def plugin_manager(self):
         """
@@ -78,15 +91,24 @@ class Engine:
         for violation in violations:
             if not violation:
                 return
-            # violate list after extracted values from a violation str
-            violation_list = self.extract_values(str(violation))
-            # generated test stub
-            test_stub_generated = TestGenerator(
-                        func_name=violation_list[0],
-                        arg_val=violation_list[1],
-                        location=violation_list[2],
-                        reason=violation_list[3]
-                       )
+            #append violation to the list of dicts
+            self._violations.append({
+                "func_name": violation.func,
+                "reason": violation.reason,
+                "args": violation.args,
+                "kwargs": violation.kwargs,
+                "contract_type": violation.location,
+                "mode": self._mode,
+                "timestamp": time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()) 
+            })
+            # generate test stub 
+            test_stub = TestGenerator(
+                func_name=violation.func,
+                arg_name=violation.arg_name,
+                arg_val=violation.arg_val,
+                location=violation.location,
+                condition=violation.condition
+            )
             match self._mode:
                 case 'strict':
                     # logging violation
@@ -94,8 +116,7 @@ class Engine:
                     #  pass to the plugin manager to handle violation
                     self.plugin_manager.dispatch('on_violation', violation)
                     #logging test suggestion
-                    from plugins.test_collector import export_test_stub_context
-                    self.plugin_manager.dispatch("on_test_generated",violation_list[0],violation_list[2],export_test_stub_context.get(),str(test_stub_generated))
+                    self.plugin_manager.dispatch("on_test_generated",violation.func,violation.location,self._export_test_stub,str(test_stub))
                     # logger.info(str(test_stub_generated))
                 case 'warn':
                     logger.warning(f"[Warn] Continuing despite violation.")
@@ -103,59 +124,10 @@ class Engine:
                     pass
                 case _:
                     logger.info("Please choose from these strict,warn,off")
-    @staticmethod                
-    def extract_values(violate_str: str) -> List[Any]:
-        """
-        --violate str of to capture list of var from thi string
-        Args:
-          violate_str: violation str
-        
-        return:
-            List[str]: [func_name,arg_val,location,reason]
-        """
-        pattern = (
-            r"in func_name:(?P<func_name>\w+)\s+at\s+location:(?P<location>\w+):"
-            r"Pre-condition failed:\s+arg_name:(?P<arg_name>\w+)=\s*arg_val:(?P<arg_val>[^->]+)->reason:(?P<reason>.+)"
-        )
-       
-        match = re.search(pattern, violate_str)
-        violate_list=[]
-        if match:
-            func_name = match.group('func_name')
-            violate_list.append(func_name)
-            arg_name = match.group('arg_name')
-            arg_val = match.group('arg_val').strip()
-            final_arg_val = __class__.repr_str(arg_val)
-            violate_list.append(final_arg_val)
-            location = match.group('location')
-            violate_list.append(location)
-            reason = match.group('reason')
-            reason = re.sub(rf"\b{re.escape(arg_name)}\b", str(final_arg_val), reason)
-            violate_list.append(reason)
-        return violate_list
-
-    @staticmethod
-    def repr_str(arg_val: Any) -> Any:
-        """
-        To check if value is str or other type to repr it. if it is string then repr other wise not
-        Args:
-           arg_val:Any type
-        return:
-            Any:Any type means if str then repr on the str
-        """
-        try:
-            #first try int
-            arg_val_converted=int(arg_val)
-        except ValueError:
-            try:
-                # then convert to float
-                arg_val_converted=float(arg_val)
-            except ValueError:
-                #keep string if not number
-                arg_val_converted = arg_val
-        # now decide whether repr or not
-        if not isinstance(arg_val_converted, str):
-            final_arg_val = arg_val_converted
+        # if _report_true then send the path and violation data to the ViolationJson class method save to file
+        if self._report:
+            file_path = CONFIG.get('reporting', {}).get('json_file_path', None)
+            ViolationJson.save_to_file(file_path, self._violations)
+            logger.info(f"Violation data saved to {file_path}")
         else:
-            final_arg_val = repr(arg_val_converted)
-        return final_arg_val
+            logger.info("Reporting is disabled, no violation data saved.")

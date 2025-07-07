@@ -17,7 +17,13 @@ DEFAULT_CONFIG = {
         "export_test_stub": "false",
         "export_stub_path": "tests/generated",
         "include_docstring": "true"
-    }
+    },
+    "reporting": {
+        "enabled": "true",
+        "export_report": "false",
+        "json_file_path": "reports/violations.json"
+    },
+    
 }
 
 CONFIG_PATHS= [
