@@ -79,17 +79,17 @@ class TypeChecker:
         
         # handle custom generic classes or fallback
         if origin is not None:
+            """
             # for custom generic classes, fallback to isinstance _valid on origin
-               """
-               generic classes are parameterized by one or more types using TypeVar and Generic to use any type without
-               any duplicate code and also ensure type safety constraints.
-               like e.g 
-               T=TypeVar('T')
-               class Box(Generic(T)):
-                PASS
-                function(a:Box[int])
-
-               """
+            e.g:
+            generic classes are parameterized by one or more types using TypeVar and Generic to use any type without
+            any duplicate code and also ensure type safety constraints.
+            like e.g 
+            T=TypeVar('T')
+            class Box(Generic(T)):
+             PASS
+             function(a:Box[int])
+            """
             try:
                 return isinstance(value, origin)
             except TypeError:

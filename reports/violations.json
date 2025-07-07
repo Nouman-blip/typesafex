@@ -1,0 +1,41 @@
+[
+    {
+        "func_name": "greet",
+        "reason": "Pre-condition failed: len(name)>8",
+        "args": [
+            "nouman"
+        ],
+        "kwargs": {
+            "a": 9
+        },
+        "contract_type": "precondition",
+        "mode": "strict",
+        "timestamp": "2025-07-07 16:57:02"
+    },
+    {
+        "func_name": "greet",
+        "reason": "Pre-condition failed: name=='Nouman'",
+        "args": [
+            "nouman"
+        ],
+        "kwargs": {
+            "a": 9
+        },
+        "contract_type": "precondition",
+        "mode": "strict",
+        "timestamp": "2025-07-07 16:57:02"
+    },
+    {
+        "func_name": "greet",
+        "reason": "Pre-condition failed: isinstance(a,str)",
+        "args": [
+            "nouman"
+        ],
+        "kwargs": {
+            "a": 9
+        },
+        "contract_type": "precondition",
+        "mode": "strict",
+        "timestamp": "2025-07-07 16:57:02"
+    }
+]

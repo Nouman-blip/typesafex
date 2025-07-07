@@ -1,6 +1,6 @@
 from config.loader import load_config
 from core.plugin_manager import PluginManager
-from plugins.test_collector import export_test_stub_context
+from core.engine import mode_context,export_test_stub_context,report_context
 from typing import Optional
 import typer
 
@@ -10,9 +10,9 @@ app=typer.Typer(help="TypeSafeX CLI tool. Use 'typesafex --help' subcommands.")
 # load the config 
 CONFIG= load_config()
 
-from decorators.ensure_types import ensure_types, mode_context
-from decorators.ensures import ensures, mode_context
-from decorators.requires import requires, mode_context
+from decorators.ensure_types import ensure_types
+from decorators.ensures import ensures
+from decorators.requires import requires
 
 @requires({'name':[('len(name)>8',lambda name: len(name)>8 ),("name=='Nouman'",lambda name: name=='Nouman' )],'a':[("isinstance(a,str)",lambda a: isinstance(a,str) )]})
 def greet(name: str,a:str) -> str:
@@ -32,7 +32,13 @@ def check(
                 "--export-test",  # long form of the option
                 "-e",  # optional short term
                 help="Export test stubs to a file.",
-            )
+            ),
+        report: Optional[bool] = typer.Option(
+            False,  # default value
+            "--report",  # long form of the option
+            "-r",  # optional short term
+            help="Generate a json report of violations.",
+        ),
         )->None:
     """
     Scans,activate, and optionally enforce runtime contracts on decoratored 
@@ -47,11 +53,15 @@ def check(
     # Set the export_test context variable based on the command line option
     effective_export_test= export_test if export_test else CONFIG['test_generation']['export_test_stub'] 
     export_test_token = export_test_stub_context.set(effective_export_test)
+    # Set the report context variable based on the command line option
+    effective_report = report if report else CONFIG['reporting']['export_report']
+    report_token = report_context.set(effective_report)
     try:
-        result = greet('nouman', 9)
+        result = greet('nouman', a=9)
     finally:
         mode_context.reset(mode_token)
         export_test_stub_context.reset(export_test_token)
+        report_context.reset(report_token)
 
 
 @app.command(help="List all loaded plugins.")

@@ -10,9 +10,9 @@ class TestGenerator:
     def __init__(self, func_name: str,arg_name:str,arg_val:Any, location: str, condition:str) -> None:
         self.func_name = func_name
         self.arg_name=arg_name
-        self.arg_val=arg_val
+        self.arg_val=repr(arg_val)
         self.location = location
-        self.condition = re.sub(rf"\b{re.escape(self.arg_name)}\b",repr(self.arg_val), condition)
+        self.condition = re.sub(rf"\b{re.escape(self.arg_name)}\b",self.arg_val, condition)
     
     def __str__(self) -> str:
         test_stub = f"\n#[Test Suggestion]\ndef test_{self.func_name}_{self.location}():\n   result={self.func_name}({self.arg_val})\n   assert {self.condition}\n"

@@ -10,13 +10,11 @@ from core.engine import Engine
 import contextvars
 import inspect
 
-mode_context=contextvars.ContextVar('mode',default=None)
 def requires(*conditions):
     def requires_decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
-            mode_ = mode_context.get()
-            engine=Engine(mode_)
+            engine=Engine()
             violations = []
             sig = inspect.signature(func)
             bound = sig.bind(*args, **kwargs)
@@ -33,15 +31,15 @@ def requires(*conditions):
         
             if results_list:
                 for result in results_list:
-                    violations.update(Violation(
+                    violations.append(Violation(
                         func=func.__name__,
-                        arg_name=result[0]
+                        arg_name=result[0],
                         arg_val=result[1],
-                        condition=result[2]
+                        condition=result[2],
                         reason=f"Pre-condition failed: {result[2]}",
-                        args=bound.args,
-                        kwargs=bound.kwargs,
-                        location='precondition'
+                        location='precondition',
+                        args=args,
+                        kwargs=kwargs
                     ))
             engine.handle_violation(func.__name__, violations)
             # block func call if violation occur means before function call

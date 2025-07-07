@@ -8,14 +8,11 @@ from functools import wraps
 from contracts.violations import Violation
 from core.engine import Engine
 import contextvars
-mode_context=contextvars.ContextVar('mode',default=None)
 def ensures(*conditions):
     def ensures_decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
-
-            mode_ = mode_context.get()
-            engine=Engine(mode_)
+            engine=Engine()
     
             result = func(*args, **kwargs)
             violations = []

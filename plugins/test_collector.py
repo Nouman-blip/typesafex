@@ -4,8 +4,6 @@ from pathlib import Path
 import contextvars
 
 CONFIG = load_config()
-# Define a context variable for exporting test stubs
-export_test_stub_context = contextvars.ContextVar("export_test_stub", default=False)
 
 class TestCollector(PluginBase):
     """
