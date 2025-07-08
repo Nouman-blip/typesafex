@@ -2,7 +2,8 @@ from config.loader import load_config
 from reporting.test_generator import TestGenerator
 from reporting.json_format_violations import ViolationJson
 from core.plugin_manager import PluginManager
-from typing import List,Dict, Any
+from typing import List, Dict, Any
+from sys import exit
 import contextvars
 import logging
 import time
@@ -18,6 +19,8 @@ CONFIG = load_config()
 report_context = contextvars.ContextVar("report", default=False)
 mode_context = contextvars.ContextVar("mode", default=None)
 export_test_stub_context = contextvars.ContextVar("export_test_stub", default=False)
+ci_context = contextvars.ContextVar("ci", default=False)
+fail_on_warn_context= contextvars.ContextVar("fail_on_warn", default=False)
 
 class Engine:
     """
@@ -29,6 +32,8 @@ class Engine:
         self._report: bool = report_context.get() 
         self._violations: List[Dict[str, Any]] = []
         self._export_test_stub: bool = export_test_stub_context.get()
+        self._ci: bool = ci_context.get()
+        self._fail_on_warn: bool = fail_on_warn_context.get()
 
 
     @property
@@ -88,6 +93,7 @@ class Engine:
         return:
             None: logs the violation
         """
+        
         for violation in violations:
             if not violation:
                 return
@@ -131,3 +137,15 @@ class Engine:
             logger.info(f"Violation data saved to {file_path}")
         else:
             logger.info("Reporting is disabled, no violation data saved.")
+        #handle ci make TypesafeX return the correct exit code on the base on violation found and ta
+        if self._ci:
+            if self._mode == "strict" and violations:
+                logger.error(f"[TYPESAFEX] ❌ {len(violations)} violation(s) found -- build failed.")
+                exit(1)
+            elif self._mode == "warn" and self._fail_on_warn and violations:
+                logger.error(f"[TYPESAFEX] ❌ {len(violations)} warning(s) found -- build failed (--fail_on_warn).")
+                exit(1)
+            else:
+                logger.info(f"[TYPESAFEX] ✅ CI mode passed with mode == {self._mode}")
+                exit(0)
+                
