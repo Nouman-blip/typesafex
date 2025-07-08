@@ -1,6 +1,6 @@
 from config.loader import load_config
 from core.plugin_manager import PluginManager
-from core.engine import mode_context,export_test_stub_context,report_context
+from core.engine import mode_context,export_test_stub_context,report_context,ci_context,fail_on_warn_context
 from typing import Optional
 import typer
 
@@ -39,6 +39,18 @@ def check(
             "-r",  # optional short term
             help="Generate a json report of violations.",
         ),
+        ci: Optional[bool] = typer.Option(
+            False,  # default value
+            "--ci",  # long form of the option
+            "-c",  # optional short term
+            help="Enable CI mode(failed on violation).",
+        ),
+        fail_on_warn: Optional[bool] = typer.Option(
+            False,  # default value
+            "--fail-on-warn",  # long form of the option
+            "-f",  # optional short term
+            help="Treat warning as build failure.",
+        )
         )->None:
     """
     Scans,activate, and optionally enforce runtime contracts on decoratored 
@@ -56,12 +68,20 @@ def check(
     # Set the report context variable based on the command line option
     effective_report = report if report else CONFIG['reporting']['export_report']
     report_token = report_context.set(effective_report)
+    # Set the CI context variable based on the command line option
+    effective_ci = ci if ci else False
+    ci_token = ci_context.set(effective_ci)
+    # Set the fail_on_warn context variable based on the command line option
+    effective_fail_on_warn = fail_on_warn if fail_on_warn else False
+    fail_on_warn_token = fail_on_warn_context.set(effective_fail_on_warn)
     try:
         result = greet('nouman', a=9)
     finally:
         mode_context.reset(mode_token)
         export_test_stub_context.reset(export_test_token)
         report_context.reset(report_token)
+        ci_context.reset(ci_token)
+        fail_on_warn_context.reset(fail_on_warn_token)
 
 
 @app.command(help="List all loaded plugins.")
