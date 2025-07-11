@@ -5,6 +5,19 @@
  post conditions 
 
  ``
-  typesafex check 
+  typesafex check
   ``
+  
+  ``
+  typesfaex check --mode (strict,warn,off)
+  ``
+
+  ``
+  typesafex check --mode strict --export-test
+  ``
+
+  ``
+  typesafex check --mode strict  --report
+  ``
+
  
