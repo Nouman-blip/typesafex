@@ -105,7 +105,7 @@ class TypeChecker:
 
 
     @staticmethod
-    def validate_args(func:Callable,*args:Any,**kwargs:Any)->List:
+    def validate_func_types_and_return(func:Callable,*args:Any,result:Any,**kwargs:Any)->List:
         """
         using the inspect signature tool to validate the args of a function
         Args:
@@ -119,36 +119,26 @@ class TypeChecker:
         sig = inspect.signature(func)
         # bound the arguments as correct maping like in tuple which belong 
         bound = sig.bind(*args, **kwargs)
-        annotations=func.__annotations__ 
+        # function return type
+        original_func_return_type = sig.return_annotation
+        return_value_type=type(result)
+        annotations = func.__annotations__
         
-        violations = []
+        
+        violations = {}
+        # if no return annotation, skip validation
+        if original_func_return_type is inspect.Signature.empty:
+            violations['return'] = [result, ""]
+         # check if the result is an instance of the annotated return type
+        if not TypeChecker._valid_type(result, original_func_return_type):
+            reason = f"Return type mismatch: expected {original_func_return_type}, got {return_value_type}"
+            violations[original_func_return_type] = [result,reason]
+
         for name, value in bound.arguments.items():
             if name in annotations:
                 expected = annotations[name]  
                 if not TypeChecker._valid_type(value, expected):
-                    violations.append(f"'{name}': expected {expected}, got {type(value)}")
-        return violations
+                    reason = f"Argument '{name}' must be of type '{expected}', but got '{type(value)}'"
+                    violations[name] = [value, reason]
 
-    @staticmethod
-    def validate_return(func: Callable,result:Any)->str:
-        """
-        -validate return type
-        Args:
-           func: func to validate its return
-           result: Any type of return value 
-        return:
-            str: violations statement 
-        """
-        sig=inspect.signature(func)        
-        original_func_return_type = sig.return_annotation
-        return_value_type=type(result)
-        
-        # if no return annotation, skip validation
-        if original_func_return_type is inspect.Signature.empty:
-            return ""
-        
-        # check if the result is an instance of the annotated return type
-        if not TyperChecker._valid_type(result, original_func_return_type):
-            return f"{func.__name__}: expected return type {original_func_return_type}, got {type(result)}"
-        
-        return ""
+        return violations

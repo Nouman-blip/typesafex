@@ -14,7 +14,7 @@ from decorators.ensure_types import ensure_types
 from decorators.ensures import ensures
 from decorators.requires import requires
 
-@requires({'name':[('len(name)>8',lambda name: len(name)>8 ),("name=='Nouman'",lambda name: name=='Nouman' )],'a':[("isinstance(a,str)",lambda a: isinstance(a,str) )]})
+@ensure_types
 def greet(name: str,a:str) -> str:
     return f"{name},bhai"
 
@@ -76,6 +76,7 @@ def check(
     fail_on_warn_token = fail_on_warn_context.set(effective_fail_on_warn)
     try:
         result = greet('nouman', a=9)
+        print(f"Result: {result}")
     finally:
         mode_context.reset(mode_token)
         export_test_stub_context.reset(export_test_token)
