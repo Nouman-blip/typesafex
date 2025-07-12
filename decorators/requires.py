@@ -41,7 +41,7 @@ def requires(*conditions):
                         args=args,
                         kwargs=kwargs
                     ))
-            engine.handle_violation(func.__name__, violations)
+            engine.handle_violations(func.__name__, violations)
             # block func call if violation occur means before function call
             if violations:
                 return
